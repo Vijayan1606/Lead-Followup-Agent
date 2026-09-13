@@ -680,10 +680,13 @@ def main():
                 "priority": analysis.priority,
                 "customer_problem": analysis.customer_problem,
                 "likely_requirement": analysis.likely_requirement,
+                "relevant_service": analysis.relevant_service,
                 "explicit_information": analysis.explicit_information,
                 "missing_information": analysis.missing_information,
                 "risk_flags": analysis.risk_flags,
                 "recommended_action": analysis.recommended_action,
+                "email_subject": analysis.email_subject,
+                "email_body": analysis.email_body,
             }
         )
 
