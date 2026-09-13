@@ -1,121 +1,187 @@
-# Lead Follow-Up Agent
+# 🤖 Lead Follow-Up Agent
 
-An AI-powered Python workflow that reads new website leads, uses
-Google's Gemini to qualify and score them, and creates a personalized
-Gmail **draft** for human review.
+An AI-powered lead qualification and follow-up system built with **Python, Google Gemini, Gmail API, Pydantic, and Streamlit**.
 
-The goal is simple: help sales teams respond to promising leads quickly
-without removing the human from the final decision. The agent handles
-lead analysis and email drafting; a salesperson reviews the draft and
-decides whether to send it.
+The application reads website leads from a CSV file, uses Gemini to analyze and score each lead, generates a personalized follow-up email, and creates the email as a **Gmail draft** for human review.
 
-------------------------------------------------------------------------
+The system does **not automatically send emails**. A salesperson always has the final decision.
 
-## Why This Exists
+---
 
-Sales teams at 50--300 person businesses can lose opportunities because
-leads do not receive a timely response.
+## 🎯 Why This Project Exists
 
-This project closes that gap by automating the repetitive first step:
+Sales teams can lose potential customers simply because new leads are not followed up quickly enough.
 
-1.  Read a new lead.
-2.  Analyze the lead with Gemini.
-3.  Assign a score and priority.
-4.  Identify the customer's problem and likely requirement.
-5.  Generate a personalized follow-up email.
-6.  Create the email as a Gmail draft.
-7.  Leave the final decision to a human.
+This project automates the repetitive first stage of the sales process:
 
-The system is designed to assist salespeople, not replace them.
+1. Read a new lead.
+2. Analyze the lead using Gemini.
+3. Score the lead from 0–100.
+4. Assign a priority.
+5. Identify the customer's problem and likely requirement.
+6. Generate a personalized follow-up email.
+7. Create a Gmail draft.
+8. Let a salesperson review and decide whether to send it.
 
-------------------------------------------------------------------------
+The goal is to improve response speed while keeping a **human-in-the-loop**.
 
-## Features
+---
 
--   **AI lead qualification** using Google Gemini
--   **Lead scoring** from 0--100
--   **Priority classification**: `HIGH`, `MEDIUM`, or `LOW`
--   **Personalized follow-up email generation**
--   **Structured AI output** validated with Pydantic
--   **Hallucination-aware prompting** that separates explicit facts from
-    inference
--   **Duplicate protection** using `processed_leads.json`
--   **Retry handling** for temporary Gemini/API failures
--   **Safe dry-run mode** for testing without Gmail
--   **Gmail draft creation** through the Gmail API
--   **Audit trail** through `lead_reviews.json`
--   **Console and file logging** through `run.log`
--   **Human-in-the-loop workflow** --- emails are drafted, not
-    automatically sent by this application
+## ✨ Features
 
-------------------------------------------------------------------------
+- 🤖 AI-powered lead qualification using Google Gemini
+- 📊 Lead scoring from **0–100**
+- 🔥 Priority classification: `HIGH`, `MEDIUM`, or `LOW`
+- ✉️ Personalized follow-up email generation
+- 🧠 Structured AI output using Pydantic
+- 🛡️ Hallucination-aware prompting
+- 🔁 Duplicate lead protection
+- ♻️ Retry handling for temporary API/network failures
+- 🧪 Safe dry-run mode
+- 📧 Gmail draft creation
+- 👤 Human review before sending
+- 📝 Audit trail using `lead_reviews.json`
+- 📋 Processing state using `processed_leads.json`
+- 📜 Application logging using `run.log`
+- 🖥️ Streamlit dashboard for viewing lead scores and AI analysis
 
-## Project Workflow
+---
 
-``` text
-                    leads.csv
-                        |
-                        v
-                New Lead Detected
-                        |
-                        v
-                Gemini AI Analysis
-                        |
-                        v
-              Structured JSON Output
-                        |
-                        v
-                Pydantic Validation
-                        |
-              +---------+---------+
-              |                   |
-          Valid Output        Invalid Output
-              |                   |
-              v                   v
-       Score & Priority       Log Error
-              |                   |
-              v                   v
-       Generate Email          Skip Lead
-              |
-              v
-       +------+------+
-       |             |
-   DRY_RUN=true  DRY_RUN=false
-       |             |
-       v             v
-   Print Draft    Gmail Draft
-                     |
-                     v
-               Human Review
-                     |
-                     v
-              Human Decides
-                 to Send
+# 🔄 System Workflow
+
+```text
+                         leads.csv
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │   New Lead    │
+                    └───────┬───────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │ Google Gemini │
+                    │  AI Analysis  │
+                    └───────┬───────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │ Structured    │
+                    │ JSON Output   │
+                    └───────┬───────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │   Pydantic    │
+                    │  Validation   │
+                    └───────┬───────┘
+                            │
+                    ┌───────┴────────┐
+                    │                │
+                  Valid            Invalid
+                    │                │
+                    ▼                ▼
+             Score & Priority     Log Error
+                    │                │
+                    ▼                ▼
+              Generate Email     Skip Lead
+                    │
+                    ▼
+              ┌──────────────┐
+              │  DRY_RUN?   │
+              └──────┬───────┘
+                     │
+             ┌───────┴────────┐
+             │                │
+           TRUE             FALSE
+             │                │
+             ▼                ▼
+        Print Result      Gmail Draft
+                              │
+                              ▼
+                        Human Review
+                              │
+                              ▼
+                       Manual Send
 ```
 
-------------------------------------------------------------------------
+---
 
-## Setup
+# 🖥️ Streamlit Dashboard
 
-### 1. Install Dependencies
+The project includes a simple Streamlit frontend for viewing processed leads and their AI analysis.
 
-``` bash
+The dashboard displays:
+
+- Total number of leads
+- High-priority leads
+- Medium-priority leads
+- Low-priority leads
+- Lead scores
+- Lead priority
+- Customer information
+- Original lead message
+- Customer problem
+- Likely requirement
+- Relevant service
+- Explicit information
+- Missing information
+- Risk flags
+- Recommended action
+- AI-generated email subject
+- AI-generated email body
+
+### Start the dashboard
+
+```bash
+streamlit run app.py
+```
+
+Then open:
+
+```text
+http://localhost:8501
+```
+
+The dashboard reads the existing lead and AI review data instead of generating new Gemini requests whenever the page is opened.
+
+---
+
+# 🧰 Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| Python | Main application |
+| Google Gemini | AI lead analysis and email generation |
+| Gmail API | Gmail draft creation |
+| Google OAuth 2.0 | Gmail authentication |
+| Pydantic | AI response validation |
+| Streamlit | Web dashboard |
+| Pandas | CSV data processing |
+| python-dotenv | Environment configuration |
+| JSON | Audit and processing state |
+
+---
+
+# ⚙️ Setup
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/Vijayan1606/Lead-Followup-Agent.git
+cd Lead-Followup-Agent
+```
+
+## 2. Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure Gemini
+## 3. Configure Gemini
 
-Create a `.env` file from `.env.example`:
+Create a `.env` file in the project directory:
 
-``` bash
-cp .env.example .env
-```
-
-On Windows PowerShell, you can also create/copy the file manually.
-
-Add your Gemini API key:
-
-``` env
+```env
 GOOGLE_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3.6-flash
 SALES_INBOX_EMAIL=your-email@gmail.com
@@ -126,273 +192,316 @@ Get a Gemini API key from Google AI Studio.
 
 **Never commit your `.env` file or expose your API key publicly.**
 
-------------------------------------------------------------------------
+---
 
-## Gmail Setup
+# 📧 Gmail API Setup
 
-Gmail integration is only required when `DRY_RUN=false`.
+Gmail integration is required only when:
 
-### 1. Create or Select a Google Cloud Project
+```env
+DRY_RUN=false
+```
 
-Open Google Cloud Console and create or select a project.
+## 1. Create or Select a Google Cloud Project
 
-### 2. Enable the Gmail API
+Create or select a project in Google Cloud Console.
 
-Go to:
-
-**Google Cloud Console → APIs & Services → Library → Gmail API →
-Enable**
-
-### 3. Configure OAuth
+## 2. Enable Gmail API
 
 Go to:
 
-**Google Auth Platform → Clients**
+```text
+Google Cloud Console
+→ APIs & Services
+→ Library
+→ Gmail API
+→ Enable
+```
+
+## 3. Create OAuth Client
+
+Go to:
+
+```text
+Google Auth Platform
+→ Clients
+```
 
 Create an OAuth client with:
 
--   Application type: **Desktop app**
--   Client name: any name you choose
+```text
+Application type: Desktop app
+```
 
-Download the OAuth client JSON file and save it in the project directory
-as:
+Download the OAuth client JSON and save it in the project directory as:
 
-``` text
+```text
 credentials.json
 ```
 
-For a personal Gmail account, if the OAuth application is in testing
-mode, add the Gmail account as a **test user** under the OAuth
-application's audience/testing settings.
+If the OAuth application is in testing mode, add the Gmail account used for testing as a **test user**.
 
-### 4. First Run
+---
 
-When running in live mode for the first time:
+# 🔐 Gmail OAuth and Permissions
 
-``` bash
-python main.py
+The application uses Google's installed application OAuth flow.
+
+The application requests the Gmail:
+
+```text
+gmail.compose
 ```
 
-the application opens a browser for Google OAuth authorization.
+scope because it needs to create Gmail drafts.
 
-After authorization, Google returns an access/refresh token that the
-application stores locally in:
+The application does **not automatically send emails**.
 
-``` text
+The workflow ends at:
+
+```text
+AI-generated email
+        ↓
+Gmail Draft
+        ↓
+Human Review
+        ↓
+Manual Send
+```
+
+After the first successful authorization, Google OAuth creates a local:
+
+```text
 token.json
 ```
 
-Do not commit `credentials.json` or `token.json` to Git.
+The token is reused on future runs.
 
-------------------------------------------------------------------------
+The following files must remain private:
 
-## Gmail OAuth and Permissions
+```text
+.env
+credentials.json
+token.json
+```
 
-The application uses Google's installed-app OAuth flow.
+---
 
-The code requests the Gmail `gmail.compose` scope because the workflow
-needs to create Gmail drafts.
+# 🧠 AI Lead Qualification
 
-The application itself **does not call Gmail's send operation**. Its
-workflow stops after creating a draft, so a salesperson remains
-responsible for reviewing and sending the email.
+Each lead is sent to Gemini with instructions to analyze the information provided by the lead.
 
-The OAuth credentials are stored locally:
+The AI produces structured information including:
 
--   `credentials.json` --- OAuth client credentials
--   `token.json` --- locally cached OAuth authorization token
+- Lead score
+- Priority
+- Customer problem
+- Likely requirement
+- Relevant service
+- Explicit information
+- Missing information
+- Recommended action
+- Risk flags
+- Email subject
+- Email body
 
-Both files must remain private and should be excluded from version
-control.
+The prompt instructs Gemini to use only information provided by the lead and avoid inventing customer details.
 
-------------------------------------------------------------------------
+---
 
-## How AI Output Is Validated
+# ✅ AI Output Validation
 
-Gemini is instructed to return structured JSON and is called with JSON
-response mode.
+Gemini is instructed to return structured JSON.
 
-The response is then parsed and validated using the Pydantic
-`LeadAnalysis` model.
+The response is parsed and validated using the Pydantic `LeadAnalysis` model.
 
-The validation enforces:
+Validation ensures:
 
--   `lead_score` must be an integer between `0` and `100`
--   `priority` must be exactly `HIGH`, `MEDIUM`, or `LOW`
--   Required fields must be present
--   Fields must contain the expected data types
+```text
+lead_score → integer between 0 and 100
 
-If the AI response cannot be parsed as JSON, the application retries the
-request once.
+priority → HIGH / MEDIUM / LOW
 
-If parsing or schema validation still fails, the lead is logged and
-skipped rather than being passed to Gmail.
+required fields → present
 
-This creates a safety boundary between the AI-generated output and the
-email-drafting step.
+field values → correct data types
+```
 
-### Hallucination Prevention
+If the AI response cannot be parsed correctly, the application retries the request.
 
-The prompt instructs Gemini to:
+If the response still fails validation, the lead is logged and skipped.
 
--   Use only facts provided by the lead
--   Avoid inventing budgets, timelines, requirements, or other customer
-    information
--   Keep inferred information separate from explicit information
--   Record missing information when the lead has not provided it
--   Avoid aggressive sales messaging when the lead explicitly asks not
-    to be contacted or is only researching
+This creates a safety boundary between the AI response and the email-drafting step.
 
-------------------------------------------------------------------------
+---
 
-## Duplicate Lead Protection
+# 🛡️ Hallucination Prevention
 
-Every successfully processed `lead_id` is recorded in:
+The AI prompt instructs Gemini to:
 
-``` text
+- Use only facts provided by the lead.
+- Avoid inventing budgets.
+- Avoid inventing timelines.
+- Avoid inventing requirements.
+- Separate explicit information from inference.
+- Identify missing information.
+- Avoid aggressive sales messaging when a lead asks not to be contacted.
+- Treat spam or test-like submissions appropriately.
+
+---
+
+# 🔁 Duplicate Lead Protection
+
+Every successfully processed lead ID is stored in:
+
+```text
 processed_leads.json
 ```
 
 Before processing a lead, the application checks this file.
 
-If the lead has already been processed, it is skipped:
+Example:
 
-``` text
+```text
 [L001] Already processed — skipping.
 ```
 
-This prevents the same lead from being analyzed and drafted repeatedly
-when the script is run again.
+This prevents the same lead from being analyzed and drafted repeatedly.
 
-New rows can be added to `leads.csv` without reprocessing previously
-completed leads.
+New leads can be added to `leads.csv` without reprocessing existing leads.
 
-------------------------------------------------------------------------
+---
 
-## Error Handling
+# ⚠️ Error Handling
 
-  -----------------------------------------------------------------------
-  Failure                             Behavior
-  ----------------------------------- -----------------------------------
-  Missing `GOOGLE_API_KEY`            Script exits with a clear error
-
-  Missing `lead_id` or `email`        Lead is skipped and a warning is
-                                      logged
-
-  Gemini API/network error            Request is retried with backoff
-
-  Invalid AI JSON                     Response is retried once, then
-                                      skipped
-
-  Pydantic validation failure         Error is logged and lead is skipped
-
-  Missing `credentials.json` in live  Clear Gmail setup error
-  mode                                
-
-  Gmail draft creation failure        Error is logged with the lead ID;
-                                      other leads can continue
-
-  Already processed lead              Lead is skipped
-  -----------------------------------------------------------------------
+| Failure | Behavior |
+|---|---|
+| Missing `GOOGLE_API_KEY` | Application exits with a clear error |
+| Missing `lead_id` or `email` | Lead is skipped and warning is logged |
+| Gemini API/network error | Request is retried |
+| Invalid AI JSON | Response is retried and then skipped |
+| Pydantic validation failure | Error is logged and lead is skipped |
+| Missing `credentials.json` | Gmail setup error is shown |
+| Gmail draft creation failure | Error is logged with lead ID |
+| Already processed lead | Lead is skipped |
 
 All important events are written to:
 
-``` text
+```text
 run.log
 ```
 
-and also displayed in the console.
+and displayed in the terminal.
 
-------------------------------------------------------------------------
+---
 
-## Dry-Run Mode
+# 🧪 Dry-Run Mode
 
-For safe development and testing, use:
+For development and testing:
 
-``` env
+```env
 DRY_RUN=true
 ```
 
-In dry-run mode:
+The pipeline runs through:
 
--   Leads are loaded from the CSV
--   Gemini analyzes the leads
--   AI output is validated
--   Duplicate protection is applied
--   Results are printed/logged
--   **No Gmail draft is created**
+```text
+CSV
+ ↓
+Gemini
+ ↓
+Validation
+ ↓
+Scoring
+ ↓
+Audit Log
+ ↓
+Print Result
+```
 
-This is the recommended mode while developing or testing prompts.
+No Gmail draft is created.
 
-------------------------------------------------------------------------
+Run:
 
-## Live Gmail Mode
+```bash
+python main.py
+```
+
+This is the recommended mode for testing prompt behavior and AI validation.
+
+---
+
+# 📬 Live Gmail Mode
 
 To create actual Gmail drafts:
 
-``` env
+```env
 DRY_RUN=false
 ```
 
 Then run:
 
-``` bash
+```bash
 python main.py
 ```
 
-The workflow will create Gmail drafts for newly processed leads.
+The application creates Gmail drafts only for newly processed leads.
 
-The application does not automatically send those drafts.
+It does not automatically send them.
 
-For testing, use a personal/test Gmail account rather than a production
-sales inbox.
+For testing, use fictional/test lead data and a test Gmail account.
 
-------------------------------------------------------------------------
+---
 
-## Test Dataset
+# 📊 Example Lead Results
 
-The included `leads.csv` contains fictional lead data designed to test
-different situations:
+The test dataset contains leads with different levels of intent.
 
--   High-intent leads
--   Medium-intent leads
--   Low-intent leads
--   Incomplete submissions
--   Spam/test-like submissions
--   Leads with specific business problems
--   Leads that are researching but not ready to buy
--   Leads that explicitly request no sales calls
+Example results:
 
-This helps verify that the AI changes its scoring and response based on
-the lead's actual message instead of generating the same response for
-everyone.
+| Lead | Score | Priority |
+|---|---:|---|
+| L001 | 92 | HIGH |
+| L002 | 85 | HIGH |
+| L003 | 40 | LOW |
+| L004 | 72 | MEDIUM |
+| L005 | 60 | MEDIUM |
+| L006 | 25 | LOW |
+| L007 | 88 | HIGH |
+| L008 | 0 | LOW |
+| L009 | 82 | HIGH |
+| L010 | 25 | LOW |
 
-------------------------------------------------------------------------
+These results demonstrate that the system changes its scoring and response based on the actual lead information.
 
-## Example Live Test
+---
 
-A live Gmail test was performed using a separate fictional test lead.
+# 📧 Live Gmail Test
 
-The successful run demonstrated:
+A separate fictional test lead was added to verify the complete live workflow.
 
-``` text
-Loaded 11 leads.
-[L011] Analyzing lead: Test Lead @ Demo Company
-[L011] Calling Gemini (gemini-3.6-flash)...
-[L011] Gemini response received.
-[L011] Schema validation passed (score=40, priority=LOW)
-[L011] Gmail draft created
-Run complete.
+The successful test demonstrated:
+
+```text
+New Lead
+   ↓
+Gemini Analysis
+   ↓
+Schema Validation
+   ↓
+Score = 55
+Priority = MEDIUM
+   ↓
+Gmail Draft Created
 ```
 
-The resulting personalized email was verified in the Gmail **Drafts**
-folder.
+The generated personalized email was verified in the Gmail **Drafts** folder.
 
 The email was not automatically sent.
 
-------------------------------------------------------------------------
+---
 
-## Audit Files
+# 📝 Audit Files
 
 ### `processed_leads.json`
 
@@ -400,57 +509,108 @@ Stores lead IDs that have already been successfully processed.
 
 ### `lead_reviews.json`
 
-Stores the AI analysis and review information for processed leads.
-
-This provides an audit trail that can be reviewed by a salesperson.
+Stores the AI qualification and review information for processed leads.
 
 ### `run.log`
 
-Contains application events, processing status, errors, retries, and
-Gmail draft creation results.
+Contains application events including:
 
-------------------------------------------------------------------------
+- Lead processing
+- Gemini requests
+- Validation results
+- Errors
+- Retries
+- Gmail draft creation
+- Duplicate detection
 
-## What to Demonstrate
+---
 
-For a project submission or demo, the following screenshots are useful:
+# 📸 Suggested Demonstration Screenshots
 
-1.  **`leads.csv`**\
-    Show the fictional leads with different intent levels.
+For a project submission, the following screenshots demonstrate the system clearly.
 
-2.  **Dry-run terminal output**\
-    Show Gemini analyzing leads and producing different
-    scores/priorities.
+### 1. Lead Dataset
 
-3.  **Validation failure**\
-    Demonstrate that malformed AI output is caught and skipped.
+Show:
 
-4.  **Duplicate protection**\
-    Run the application again and show:
+```text
+leads.csv
+```
 
-    ``` text
-    Already processed — skipping.
-    ```
+with different test leads.
 
-5.  **Audit files**\
-    Show `run.log` and `lead_reviews.json`.
+### 2. Streamlit Dashboard
 
-6.  **Gmail Drafts**\
-    Show a newly created draft in Gmail.
+Show:
 
-7.  **Opened Gmail draft**\
-    Show the personalized subject and email body.
+```text
+Total Leads
+High Priority
+Medium Priority
+Low Priority
+```
 
-------------------------------------------------------------------------
+and the lead table.
 
-## Recommended Demo GIF
+### 3. AI Analysis
 
-A short 15--20 second demo can show the complete workflow:
+Select a lead and show:
 
-``` text
+```text
+Lead Score
+Priority
+Customer Problem
+Likely Requirement
+Missing Information
+Recommended Action
+Risk Flags
+```
+
+### 4. Generated Email
+
+Show:
+
+```text
+AI-Generated Follow-Up
+
+Subject
+Email Body
+```
+
+### 5. Gmail Draft
+
+Show the generated draft in Gmail.
+
+### 6. Duplicate Protection
+
+Show the terminal output:
+
+```text
+Already processed — skipping.
+```
+
+### 7. Audit Trail
+
+Show:
+
+```text
+processed_leads.json
+lead_reviews.json
+run.log
+```
+
+---
+
+# 🎬 Recommended Demo GIF
+
+A short 15–20 second GIF can demonstrate the complete workflow:
+
+```text
 Run python main.py
         ↓
 Lead analyzed
+        ↓
+Gemini response received
         ↓
 Schema validation passed
         ↓
@@ -461,35 +621,39 @@ Open Gmail Drafts
 Open personalized email
 ```
 
-This demonstrates the complete AI-to-Gmail workflow while making it
-clear that the final send decision remains with the salesperson.
+This demonstrates the complete AI-to-Gmail workflow while keeping the final send decision with the salesperson.
 
-------------------------------------------------------------------------
+---
 
-## Project Structure
+# 📁 Project Structure
 
-``` text
+```text
 lead-followup-agent/
 │
-├── main.py                  # Main workflow
-├── leads.csv                # Fictional test leads
-├── requirements.txt         # Python dependencies
-├── .env.example             # Environment variable template
-├── README.md                # Project documentation
+├── main.py                 # Main AI workflow
+├── app.py                  # Streamlit dashboard
+├── leads.csv               # Fictional test leads
+├── requirements.txt        # Python dependencies
+├── .env.example            # Environment variable template
+├── README.md               # Project documentation
 │
-├── credentials.json         # Private Google OAuth credentials
-├── token.json               # Private OAuth token
+├── credentials.json        # Private Google OAuth credentials
+├── token.json              # Private OAuth token
 │
-├── processed_leads.json     # Duplicate-processing state
-├── lead_reviews.json        # AI review/audit data
-└── run.log                  # Application log
+├── processed_leads.json    # Duplicate-processing state
+├── lead_reviews.json       # AI analysis and audit data
+└── run.log                 # Application logs
 ```
 
-### Files That Must NOT Be Committed
+---
 
-Add these to `.gitignore`:
+# 🔒 Security
 
-``` gitignore
+Never commit sensitive credentials to GitHub.
+
+The following files should be excluded from version control:
+
+```gitignore
 .env
 credentials.json
 token.json
@@ -497,39 +661,46 @@ __pycache__/
 *.pyc
 ```
 
-Never upload API keys, OAuth client secrets, or personal access tokens
-to GitHub.
+Never publish:
 
-------------------------------------------------------------------------
+- Gemini API keys
+- OAuth client secrets
+- OAuth access tokens
+- Refresh tokens
+- Other private credentials
 
-## Technologies Used
+---
 
--   **Python**
--   **Google Gemini API**
--   **Google Gmail API**
--   **Pydantic**
--   **Google OAuth 2.0**
--   **CSV**
--   **JSON**
--   **python-dotenv**
+# 🧑‍💻 Technologies Used
 
-------------------------------------------------------------------------
+- Python
+- Google Gemini API
+- Google Gmail API
+- Google OAuth 2.0
+- Pydantic
+- Streamlit
+- Pandas
+- python-dotenv
+- CSV
+- JSON
 
-## Safety and Design Principles
+---
 
-This project follows a human-in-the-loop approach:
+# 🛡️ Safety and Design Principles
 
--   AI analyzes and drafts.
--   Structured validation happens before Gmail integration.
--   Duplicate leads are detected before processing.
--   Failed AI responses are not sent to Gmail.
--   Gmail drafts are created instead of automatically sending emails.
--   Customer information is not invented by the prompt.
--   OAuth credentials and API keys remain local and private.
+This project follows a human-in-the-loop design:
 
-------------------------------------------------------------------------
+- AI analyzes leads and drafts emails.
+- Structured validation happens before Gmail integration.
+- Duplicate leads are detected before processing.
+- Failed AI responses are not passed to Gmail.
+- Gmail drafts are created instead of automatically sending emails.
+- Customer information is not invented by the prompt.
+- OAuth credentials and API keys remain local and private.
+- Test data is fictional.
 
-## License
+---
 
-This project is intended for educational, demonstration, and portfolio
-purposes.
+# 📄 License
+
+This project is intended for educational, demonstration, and portfolio purposes.
